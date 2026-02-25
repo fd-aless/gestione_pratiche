@@ -1,0 +1,1548 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>CAF – Gestione Pratiche 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════
+   RESET & VARIABLES
+═══════════════════════════════════════════════════ */
+:root {
+  --bg: #080E1A;
+  --bg2: #0D1526;
+  --bg3: #111D33;
+  --surface: rgba(255,255,255,0.04);
+  --surface2: rgba(255,255,255,0.07);
+  --border: rgba(255,255,255,0.08);
+  --border2: rgba(255,255,255,0.14);
+  --orange: #F06419;
+  --orange2: #FF8040;
+  --orangeG: linear-gradient(135deg, #F06419, #FF8040);
+  --blue: #2563EB;
+  --blue2: #3B82F6;
+  --blueG: linear-gradient(135deg, #2563EB, #3B82F6);
+  --green: #059669;
+  --green2: #10B981;
+  --greenG: linear-gradient(135deg, #059669, #10B981);
+  --red: #DC2626;
+  --amber: #D97706;
+  --white: #F1F5F9;
+  --gray: #64748B;
+  --gray2: #94A3B8;
+  --gray3: #CBD5E1;
+  --font: 'Sora', sans-serif;
+  --mono: 'JetBrains Mono', monospace;
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow-orange: 0 8px 32px rgba(240,100,25,0.3);
+  --shadow-blue: 0 8px 32px rgba(37,99,235,0.25);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--bg3); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════════
+   PAGES (view system)
+═══════════════════════════════════════════════════ */
+.view { display: none; }
+
+/* ═══════════════════════════════════════════════════
+   TOPBAR
+═══════════════════════════════════════════════════ */
+.topbar {
+  background: rgba(8,14,26,0.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+}
+.logo {
+  width: 36px; height: 36px;
+  background: var(--orangeG);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 13px; color: white;
+  box-shadow: 0 4px 12px rgba(240,100,25,0.4);
+  flex-shrink: 0;
+}
+.topbar-info { flex: 1; min-width: 0; }
+.topbar-title { font-size: 14px; font-weight: 700; color: white; }
+.topbar-sub { font-size: 11px; color: var(--gray2); }
+.role-pill {
+  padding: 5px 12px; border-radius: 20px;
+  font-size: 11px; font-weight: 700; letter-spacing: 0.3px;
+  flex-shrink: 0;
+}
+.role-pill.utente { background: rgba(37,99,235,0.15); color: #60A5FA; border: 1px solid rgba(37,99,235,0.3); }
+.role-pill.operatore { background: rgba(240,100,25,0.15); color: #FB923C; border: 1px solid rgba(240,100,25,0.3); }
+.btn-logout {
+  padding: 7px 14px; border-radius: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--gray2); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: var(--font);
+  transition: all 0.2s; flex-shrink: 0;
+}
+.btn-logout:hover { color: white; background: var(--surface2); border-color: var(--border2); }
+.back-link {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--gray2); font-size: 12px; font-weight: 600;
+  cursor: pointer; padding: 7px 12px;
+  border-radius: 8px; background: var(--surface);
+  border: 1px solid var(--border); transition: all 0.2s;
+  text-decoration: none; flex-shrink: 0;
+}
+.back-link:hover { color: white; border-color: var(--border2); }
+
+/* ═══════════════════════════════════════════════════
+   MAIN CONTAINER
+═══════════════════════════════════════════════════ */
+.main { max-width: 960px; margin: 0 auto; padding: 24px 16px 60px; }
+.main-wide { max-width: 1100px; margin: 0 auto; padding: 24px 16px 60px; }
+
+/* ═══════════════════════════════════════════════════
+   LOGIN PAGE
+═══════════════════════════════════════════════════ */
+#viewLogin {
+  min-height: 100vh;
+  min-height: 100dvh;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: var(--bg);
+  position: relative;
+}
+#viewLogin::before {
+  content: '';
+  position: fixed; inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 30% 20%, rgba(240,100,25,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 40% at 80% 70%, rgba(37,99,235,0.07) 0%, transparent 60%);
+  pointer-events: none;
+}
+.login-card {
+  width: 100%; max-width: 400px;
+  background: var(--bg2);
+  border: 1px solid var(--border2);
+  border-radius: 24px;
+  padding: 36px 28px;
+  box-shadow: 0 32px 80px rgba(0,0,0,0.5);
+  animation: fadeUp 0.4s ease;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.login-logo-wrap { text-align: center; margin-bottom: 32px; }
+.login-logo {
+  width: 72px; height: 72px;
+  background: var(--orangeG);
+  border-radius: 20px;
+  display: inline-flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 24px; color: white;
+  box-shadow: var(--shadow-orange);
+  margin-bottom: 16px;
+}
+.login-app-title { font-size: 20px; font-weight: 800; color: white; margin-bottom: 4px; }
+.login-app-sub { font-size: 12px; color: var(--gray2); }
+
+.role-tabs {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; margin-bottom: 24px;
+}
+.role-tab {
+  padding: 14px 10px; border-radius: 12px;
+  border: 2px solid var(--border);
+  background: transparent; cursor: pointer;
+  text-align: center; transition: all 0.2s;
+  color: var(--gray);
+}
+.role-tab:hover { border-color: var(--border2); color: var(--gray3); }
+.role-tab.sel-u { border-color: var(--blue2); background: rgba(37,99,235,0.1); color: #60A5FA; }
+.role-tab.sel-o { border-color: var(--orange); background: rgba(240,100,25,0.1); color: #FB923C; }
+.role-tab-icon { font-size: 26px; margin-bottom: 6px; }
+.role-tab-label { font-size: 13px; font-weight: 700; }
+.role-tab-sub { font-size: 10px; opacity: 0.7; margin-top: 2px; }
+
+.form-field { margin-bottom: 16px; }
+.form-field label {
+  display: block; font-size: 11px; font-weight: 700;
+  color: var(--gray2); text-transform: uppercase; letter-spacing: 0.6px;
+  margin-bottom: 8px;
+}
+.form-field input, .form-field select {
+  width: 100%; padding: 12px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: white; font-size: 15px;
+  font-family: var(--font);
+  transition: all 0.2s;
+}
+.form-field input:focus, .form-field select:focus {
+  outline: none; border-color: var(--orange);
+  background: rgba(255,255,255,0.08);
+}
+.form-field input::placeholder { color: var(--gray); }
+.form-field select option { background: #1A2744; }
+
+.err-box {
+  background: rgba(220,38,38,0.1); border: 1px solid rgba(220,38,38,0.3);
+  color: #F87171; padding: 10px 14px; border-radius: var(--radius-sm);
+  font-size: 12px; text-align: center; margin-bottom: 16px;
+  display: none;
+}
+.err-box.show { display: block; }
+
+.cred-hint {
+  margin-top: 20px; padding: 14px;
+  background: rgba(255,255,255,0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 11px; color: var(--gray);
+  font-family: var(--mono);
+  line-height: 1.8;
+}
+.cred-hint strong { color: var(--gray3); font-family: var(--font); display: block; margin-bottom: 4px; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ═══════════════════════════════════════════════════
+   BUTTONS
+═══════════════════════════════════════════════════ */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 8px; padding: 13px 22px;
+  border-radius: var(--radius-sm); border: none;
+  font-size: 14px; font-weight: 700; cursor: pointer;
+  font-family: var(--font); transition: all 0.2s;
+  text-decoration: none; white-space: nowrap;
+}
+.btn-full { width: 100%; }
+.btn-orange {
+  background: var(--orangeG); color: white;
+  box-shadow: var(--shadow-orange);
+}
+.btn-orange:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(240,100,25,0.45); }
+.btn-orange:active { transform: translateY(0); }
+.btn-orange:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-green {
+  background: var(--greenG); color: white;
+  box-shadow: 0 8px 24px rgba(5,150,105,0.3);
+}
+.btn-green:hover { transform: translateY(-2px); }
+.btn-green:disabled { opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-ghost {
+  background: var(--surface2); color: var(--gray3);
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { background: rgba(255,255,255,0.1); color: white; border-color: var(--border2); }
+.btn-sm { padding: 7px 14px; font-size: 12px; border-radius: 8px; }
+
+/* ═══════════════════════════════════════════════════
+   CARDS
+═══════════════════════════════════════════════════ */
+.card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 16px;
+}
+.card-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 10px;
+}
+.card-icon { font-size: 18px; }
+.card-title { font-size: 14px; font-weight: 700; color: white; }
+.card-subtitle { font-size: 11px; color: var(--gray2); margin-top: 1px; }
+.card-body { padding: 20px; }
+
+/* INFO ROWS */
+.info-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  padding: 9px 0; border-bottom: 1px solid var(--border); font-size: 13px;
+  gap: 10px;
+}
+.info-row:last-child { border-bottom: none; }
+.info-label { color: var(--gray2); font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; flex-shrink: 0; }
+.info-val { color: white; font-weight: 500; text-align: right; word-break: break-word; }
+.info-val.mono { font-family: var(--mono); font-size: 12px; }
+
+/* ═══════════════════════════════════════════════════
+   FORM GRID
+═══════════════════════════════════════════════════ */
+.fg { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.fg3 { grid-template-columns: 1fr 1fr 1fr; }
+.f { display: flex; flex-direction: column; gap: 6px; }
+.f.s2 { grid-column: span 2; }
+.f.s3 { grid-column: span 3; }
+.f label {
+  font-size: 11px; font-weight: 700; color: var(--gray3);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.f label .req { color: var(--orange2); }
+.f input, .f select {
+  padding: 10px 12px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: white; font-size: 14px; font-family: var(--font);
+  transition: all 0.2s; width: 100%;
+}
+.f input:focus, .f select:focus {
+  outline: none; border-color: var(--orange);
+  background: rgba(255,255,255,0.08);
+}
+.f input::placeholder { color: var(--gray); }
+.f select option { background: #1A2744; }
+.f-err { font-size: 10px; color: #F87171; display: none; }
+.f-err.show { display: block; }
+.fdiv { grid-column: 1/-1; border: none; border-top: 1px solid var(--border); margin: 4px 0; }
+.flabel {
+  grid-column: 1/-1; font-size: 10px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.8px; color: var(--orange2);
+}
+
+/* ═══════════════════════════════════════════════════
+   STEPPER
+═══════════════════════════════════════════════════ */
+.steps {
+  display: flex; align-items: center;
+  margin-bottom: 24px; overflow-x: auto;
+  padding-bottom: 4px; gap: 0;
+}
+.steps::-webkit-scrollbar { display: none; }
+.step { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.step-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 700; font-size: 12px;
+  border: 2px solid var(--border2); color: var(--gray);
+  transition: all 0.3s;
+}
+.step.active .step-num { background: var(--orange); border-color: var(--orange); color: white; box-shadow: 0 0 0 4px rgba(240,100,25,0.2); }
+.step.done .step-num { background: var(--green); border-color: var(--green); color: white; }
+.step-label { font-size: 11px; font-weight: 600; color: var(--gray); white-space: nowrap; }
+.step.active .step-label { color: white; }
+.step.done .step-label { color: var(--green2); }
+.step-line { flex: 1; height: 2px; background: var(--border); margin: 0 8px; min-width: 20px; transition: background 0.3s; }
+.step-line.done { background: var(--green2); }
+
+/* ═══════════════════════════════════════════════════
+   TIPO CARDS
+═══════════════════════════════════════════════════ */
+.tipo-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.tipo-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius); padding: 22px 16px;
+  cursor: pointer; transition: all 0.2s; text-align: center;
+}
+.tipo-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+.tipo-card.sel730 { border-color: var(--orange); background: rgba(240,100,25,0.08); }
+.tipo-card.selISEE { border-color: var(--blue2); background: rgba(37,99,235,0.08); }
+.tipo-icon { font-size: 34px; margin-bottom: 10px; }
+.tipo-title { font-size: 15px; font-weight: 800; color: white; margin-bottom: 4px; }
+.tipo-sub { font-size: 11px; color: var(--gray2); line-height: 1.5; }
+
+/* ═══════════════════════════════════════════════════
+   UPLOAD ZONE
+═══════════════════════════════════════════════════ */
+.upload-zone {
+  border: 2px dashed rgba(255,255,255,0.12);
+  border-radius: var(--radius); padding: 28px 16px;
+  text-align: center; cursor: pointer;
+  transition: all 0.3s; background: rgba(255,255,255,0.02);
+  position: relative;
+}
+.upload-zone:hover, .upload-zone.drag {
+  border-color: var(--orange); background: rgba(240,100,25,0.05);
+}
+.upload-zone input[type=file] {
+  position: absolute; inset: 0; opacity: 0;
+  cursor: pointer; width: 100%; height: 100%;
+}
+.upload-icon { font-size: 32px; margin-bottom: 8px; }
+.upload-title { font-size: 13px; font-weight: 700; color: var(--gray3); margin-bottom: 4px; }
+.upload-sub { font-size: 11px; color: var(--gray); }
+.upload-actions { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.progress-bar { height: 3px; background: var(--border); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+.progress-fill { height: 100%; background: var(--orange); border-radius: 2px; transition: width 0.4s; width: 0%; }
+.file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 7px; }
+.file-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 12px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+}
+.file-item.ok { border-color: rgba(16,185,129,0.3); background: rgba(16,185,129,0.04); }
+.file-item.err { border-color: rgba(220,38,38,0.3); }
+.file-name { font-size: 12px; color: var(--gray3); flex: 1; word-break: break-all; }
+.file-size { font-size: 10px; color: var(--gray); font-family: var(--mono); flex-shrink: 0; }
+.badge-ok { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(16,185,129,0.2); color: #34D399; flex-shrink: 0; }
+.badge-err { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(220,38,38,0.2); color: #F87171; flex-shrink: 0; }
+.badge-wait { font-size: 9px; font-weight: 700; padding: 2px 7px; border-radius: 20px; background: rgba(217,119,6,0.2); color: #FCD34D; flex-shrink: 0; }
+.alert-ok {
+  background: rgba(5,150,105,0.1); border: 1px solid rgba(16,185,129,0.3);
+  color: #34D399; padding: 10px 14px; border-radius: var(--radius-sm);
+  font-size: 12px; display: none; align-items: center; gap: 8px; margin-top: 12px;
+}
+
+/* ═══════════════════════════════════════════════════
+   BADGES
+═══════════════════════════════════════════════════ */
+.badge {
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;
+}
+.badge::before { content: ''; width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+.badge-tipo {
+  padding: 4px 10px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.4px;
+}
+.bt730 { background: rgba(240,100,25,0.15); color: #FB923C; border: 1px solid rgba(240,100,25,0.3); }
+.btISEE { background: rgba(37,99,235,0.15); color: #60A5FA; border: 1px solid rgba(37,99,235,0.3); }
+.s-attesa { background: rgba(217,119,6,0.12); color: #FCD34D; }
+.s-attesa::before { background: #FCD34D; }
+.s-inviata { background: rgba(37,99,235,0.12); color: #60A5FA; }
+.s-inviata::before { background: #60A5FA; }
+.s-pronta { background: rgba(16,185,129,0.12); color: #34D399; }
+.s-pronta::before { background: #34D399; }
+
+/* ═══════════════════════════════════════════════════
+   PRATICA CARDS (lista utente)
+═══════════════════════════════════════════════════ */
+.pcard {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); overflow: hidden; margin-bottom: 12px;
+  transition: border-color 0.2s;
+}
+.pcard:hover { border-color: var(--border2); }
+.pcard-head {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 18px;
+}
+.pcard-avatar {
+  width: 48px; height: 48px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.pcard-nome { font-size: 15px; font-weight: 700; color: white; }
+.pcard-cf { font-family: var(--mono); font-size: 11px; color: var(--gray2); margin-top: 2px; }
+.pcard-badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; align-items: center; }
+.pcard-date { font-size: 10px; color: var(--gray); }
+.pcard-downloads { border-top: 1px solid var(--border); }
+.download-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 18px; border-bottom: 1px solid var(--border);
+  cursor: pointer; transition: background 0.15s;
+}
+.download-row:last-child { border-bottom: none; }
+.download-row:hover { background: rgba(255,255,255,0.03); }
+.download-name { font-size: 13px; color: white; flex: 1; font-weight: 500; }
+.download-badge {
+  padding: 3px 10px; border-radius: 20px;
+  font-size: 10px; font-weight: 700;
+  background: rgba(16,185,129,0.15); color: #34D399;
+  border: 1px solid rgba(16,185,129,0.3);
+}
+
+/* ═══════════════════════════════════════════════════
+   OPERATOR TABLE
+═══════════════════════════════════════════════════ */
+.op-table { width: 100%; border-collapse: collapse; }
+.op-table thead tr { background: rgba(255,255,255,0.04); border-bottom: 1px solid var(--border); }
+.op-table th { padding: 11px 16px; font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px; color: var(--gray2); text-align: left; }
+.op-table td { padding: 13px 16px; font-size: 13px; color: var(--gray3); border-bottom: 1px solid var(--border); }
+.op-table tr:last-child td { border-bottom: none; }
+.op-table tbody tr { transition: background 0.15s; }
+.op-table tbody tr:hover { background: rgba(255,255,255,0.025); cursor: pointer; }
+.nome-strong { color: white; font-weight: 700; font-size: 13px; }
+.cf-small { font-family: var(--mono); font-size: 10px; color: var(--gray); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════
+   STATS ROW
+═══════════════════════════════════════════════════ */
+.stats-row { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 24px; }
+.stat-card {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 18px 16px;
+  display: flex; align-items: center; gap: 12px;
+}
+.stat-ic { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+.stat-ic.o { background: rgba(240,100,25,0.15); }
+.stat-ic.b { background: rgba(37,99,235,0.15); }
+.stat-ic.g { background: rgba(5,150,105,0.15); }
+.stat-ic.a { background: rgba(217,119,6,0.15); }
+.stat-val { font-size: 24px; font-weight: 800; color: white; line-height: 1; }
+.stat-label { font-size: 11px; color: var(--gray2); margin-top: 3px; }
+
+/* ═══════════════════════════════════════════════════
+   FILTER TABS
+═══════════════════════════════════════════════════ */
+.filter-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+.ftab {
+  padding: 6px 14px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  border: 1px solid var(--border); background: transparent; color: var(--gray2);
+  cursor: pointer; transition: all 0.2s; font-family: var(--font);
+}
+.ftab:hover { background: var(--surface2); color: white; }
+.ftab.active { background: var(--surface2); color: var(--orange2); border-color: var(--orange); }
+
+/* ═══════════════════════════════════════════════════
+   SEARCH
+═══════════════════════════════════════════════════ */
+.search-box {
+  width: 100%; padding: 10px 16px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); color: white; font-size: 13px;
+  font-family: var(--font); transition: border-color 0.2s; margin-bottom: 16px;
+}
+.search-box::placeholder { color: var(--gray); }
+.search-box:focus { outline: none; border-color: var(--orange); }
+
+/* ═══════════════════════════════════════════════════
+   TWO COL
+═══════════════════════════════════════════════════ */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+/* BANNER */
+.banner {
+  background: linear-gradient(135deg, rgba(37,99,235,0.12), rgba(59,130,246,0.05));
+  border: 1px solid rgba(37,99,235,0.2); border-radius: var(--radius);
+  padding: 20px; margin-bottom: 20px;
+  display: flex; align-items: center; gap: 16px;
+}
+.banner-icon { font-size: 36px; flex-shrink: 0; }
+.banner-title { font-size: 17px; font-weight: 800; color: white; margin-bottom: 3px; }
+.banner-sub { font-size: 12px; color: var(--gray2); }
+
+/* EMPTY STATE */
+.empty-state { text-align: center; padding: 48px 20px; }
+.empty-icon { font-size: 44px; margin-bottom: 12px; opacity: 0.35; }
+.empty-title { font-size: 15px; font-weight: 700; color: var(--gray3); margin-bottom: 6px; }
+.empty-sub { font-size: 12px; color: var(--gray); }
+
+/* ROW actions */
+.btn-row {
+  display: flex; gap: 10px; justify-content: flex-end;
+  margin-top: 20px; padding-top: 18px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+/* PRATICA HEADER */
+.ph {
+  background: var(--bg2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 20px;
+  margin-bottom: 20px; display: flex; align-items: center; gap: 16px;
+}
+.ph-avatar {
+  width: 56px; height: 56px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; flex-shrink: 0;
+}
+.ph-nome { font-size: 19px; font-weight: 800; color: white; }
+.ph-cf { font-family: var(--mono); font-size: 12px; color: var(--gray2); margin-top: 3px; }
+.ph-badges { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+/* SUCCESS BOX */
+.success-box {
+  text-align: center; padding: 48px 24px;
+  background: rgba(5,150,105,0.06);
+  border: 1px solid rgba(16,185,129,0.2);
+  border-radius: var(--radius);
+}
+.success-icon { font-size: 60px; margin-bottom: 14px; }
+.success-title { font-size: 20px; font-weight: 800; color: #34D399; margin-bottom: 8px; }
+.success-sub { font-size: 13px; color: var(--gray2); line-height: 1.7; }
+
+/* ═══════════════════════════════════════════════════
+   SECTION HEADER
+═══════════════════════════════════════════════════ */
+.sec-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; flex-wrap: wrap; gap: 10px; }
+.sec-title { font-size: 17px; font-weight: 800; color: white; }
+.sec-sub { font-size: 11px; color: var(--gray2); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════════════════ */
+@media (max-width: 680px) {
+  .two-col { grid-template-columns: 1fr; }
+  .fg3 { grid-template-columns: 1fr 1fr; }
+  .f.s3 { grid-column: span 2; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .main, .main-wide { padding: 16px 12px 60px; }
+  .ph { flex-direction: column; align-items: flex-start; }
+  .ph > .btn-ghost { align-self: flex-start; }
+}
+@media (max-width: 460px) {
+  .fg, .fg3 { grid-template-columns: 1fr; }
+  .f.s2, .f.s3 { grid-column: span 1; }
+  .tipo-grid { grid-template-columns: 1fr 1fr; }
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .role-tabs { grid-template-columns: 1fr 1fr; }
+  .login-card { padding: 28px 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════
+     VIEW: LOGIN
+═══════════════════════════════════════════════ -->
+<div id="viewLogin" class="view active">
+  <div class="login-card">
+    <div class="login-logo-wrap">
+      <div class="login-logo">CAF</div>
+      <div class="login-app-title">Gestione Pratiche</div>
+      <div class="login-app-sub">730/2026 · ISEE 2026</div>
+    </div>
+    <div class="role-tabs">
+      <div class="role-tab sel-u" id="tabU" onclick="selRole('utente')">
+        <div class="role-tab-icon">👤</div>
+        <div class="role-tab-label">Utente</div>
+        <div class="role-tab-sub">Inserisci documenti</div>
+      </div>
+      <div class="role-tab" id="tabO" onclick="selRole('operatore')">
+        <div class="role-tab-icon">🔧</div>
+        <div class="role-tab-label">Operatore</div>
+        <div class="role-tab-sub">Gestisci pratiche</div>
+      </div>
+    </div>
+    <div class="err-box" id="loginErr">Username o password non corretti</div>
+    <div class="form-field">
+      <label>Username</label>
+      <input type="text" id="loginUser" placeholder="Inserisci username" autocomplete="username">
+    </div>
+    <div class="form-field">
+      <label>Password</label>
+      <input type="password" id="loginPass" placeholder="Inserisci password"
+             onkeydown="if(event.key==='Enter')doLogin()">
+    </div>
+    <button class="btn btn-orange btn-full" onclick="doLogin()">Accedi →</button>
+    <div class="cred-hint">
+      <strong>Credenziali</strong>
+      Utente &nbsp;&nbsp; u: <b>utente</b> &nbsp; p: <b>123456</b><br>
+      Operatore &nbsp; u: <b>operatore</b> &nbsp; p: <b>123456</b>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     VIEW: AREA UTENTE – DASHBOARD
+═══════════════════════════════════════════════ -->
+<div id="viewUtenteDash" class="view">
+  <div class="topbar">
+    <div class="logo">CAF</div>
+    <div class="topbar-info">
+      <div class="topbar-title">Le mie pratiche</div>
+      <div class="topbar-sub">Area Utente</div>
+    </div>
+    <span class="role-pill utente">👤 Utente</span>
+    <button class="btn-logout" onclick="doLogout()">Esci</button>
+  </div>
+  <div class="main">
+    <div class="banner">
+      <div class="banner-icon">📋</div>
+      <div>
+        <div class="banner-title">Le mie pratiche CAF</div>
+        <div class="banner-sub">Visualizza lo stato e scarica i modelli quando disponibili</div>
+      </div>
+    </div>
+    <div class="sec-header">
+      <div>
+        <div class="sec-title">Le mie pratiche</div>
+      </div>
+      <button class="btn btn-orange" onclick="showView('viewUtenteNuova'); initNuovaPratica()">＋ Nuova Pratica</button>
+    </div>
+    <div id="listaPraticheUtente"></div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     VIEW: AREA UTENTE – NUOVA PRATICA
+═══════════════════════════════════════════════ -->
+<div id="viewUtenteNuova" class="view">
+  <div class="topbar">
+    <div class="logo">CAF</div>
+    <div class="topbar-info">
+      <div class="topbar-title">Nuova Pratica</div>
+      <div class="topbar-sub">Area Utente</div>
+    </div>
+    <span class="back-link" onclick="showView('viewUtenteDash'); renderListaUtente()">← Le mie pratiche</span>
+  </div>
+  <div class="main">
+    <!-- STEPPER -->
+    <div class="steps" id="stepperNuova">
+      <div class="step active" id="sN1"><div class="step-num">1</div><div class="step-label">Tipo</div></div>
+      <div class="step-line" id="lN1"></div>
+      <div class="step" id="sN2"><div class="step-num">2</div><div class="step-label">Dati</div></div>
+      <div class="step-line" id="lN2"></div>
+      <div class="step" id="sN3"><div class="step-num">3</div><div class="step-label">Documenti</div></div>
+      <div class="step-line" id="lN3"></div>
+      <div class="step" id="sN4"><div class="step-num">✓</div><div class="step-label">Inviata</div></div>
+    </div>
+
+    <!-- STEP 1 -->
+    <div id="stepN1" class="step-page">
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📋</span><div><div class="card-title">Tipo di Pratica</div><div class="card-subtitle">Seleziona il servizio di cui hai bisogno</div></div></div>
+        <div class="card-body">
+          <div class="tipo-grid">
+            <div class="tipo-card sel730" id="tc730" onclick="selTipo('730')">
+              <div class="tipo-icon">📄</div>
+              <div class="tipo-title">730 / 2026</div>
+              <div class="tipo-sub">Dichiarazione redditi 2025<br>Dipendenti e pensionati</div>
+            </div>
+            <div class="tipo-card" id="tcISEE" onclick="selTipo('ISEE')">
+              <div class="tipo-icon">🏠</div>
+              <div class="tipo-title">ISEE 2026</div>
+              <div class="tipo-sub">Indicatore situazione economica<br>Prestazioni sociali agevolate</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="showView('viewUtenteDash'); renderListaUtente()">← Le mie pratiche</button>
+        <button class="btn btn-orange" onclick="goNuovaStep(2)">Continua →</button>
+      </div>
+    </div>
+
+    <!-- STEP 2 -->
+    <div id="stepN2" class="step-page" style="display:none">
+      <div class="card">
+        <div class="card-header"><span class="card-icon">👤</span><div><div class="card-title">Dati Anagrafici</div><div class="card-subtitle">Tutti i campi con * sono obbligatori</div></div></div>
+        <div class="card-body">
+          <div class="fg fg3">
+            <div class="f s2">
+              <label>Cognome <span class="req">*</span></label>
+              <input type="text" id="fCognome" placeholder="Es. Rossi" autocomplete="family-name">
+              <span class="f-err" id="eCognome">Obbligatorio</span>
+            </div>
+            <div class="f">
+              <label>Nome <span class="req">*</span></label>
+              <input type="text" id="fNome" placeholder="Es. Mario" autocomplete="given-name">
+              <span class="f-err" id="eNome">Obbligatorio</span>
+            </div>
+            <div class="f">
+              <label>Codice Fiscale <span class="req">*</span></label>
+              <input type="text" id="fCF" placeholder="RSSMRA80A01H501Z" maxlength="16" style="text-transform:uppercase" autocomplete="off">
+              <span class="f-err" id="eCF">Servono 16 caratteri</span>
+            </div>
+            <div class="f">
+              <label>Sesso <span class="req">*</span></label>
+              <select id="fSesso">
+                <option value="">Seleziona...</option>
+                <option value="M">M – Maschile</option>
+                <option value="F">F – Femminile</option>
+              </select>
+              <span class="f-err" id="eSesso">Obbligatorio</span>
+            </div>
+            <div class="f">
+              <label>Data di Nascita <span class="req">*</span></label>
+              <input type="date" id="fNascita">
+              <span class="f-err" id="eNascita">Obbligatorio</span>
+            </div>
+            <hr class="fdiv">
+            <div class="flabel">Residenza</div>
+            <div class="f s2">
+              <label>Comune <span class="req">*</span></label>
+              <input type="text" id="fComune" placeholder="Es. Milano" autocomplete="address-level2">
+              <span class="f-err" id="eComune">Obbligatorio</span>
+            </div>
+            <div class="f">
+              <label>Prov. <span class="req">*</span></label>
+              <input type="text" id="fProv" placeholder="MI" maxlength="2" style="text-transform:uppercase">
+              <span class="f-err" id="eProv">Obbligatorio</span>
+            </div>
+            <div class="f s2">
+              <label>Indirizzo</label>
+              <input type="text" id="fIndirizzo" placeholder="Via Roma, 1" autocomplete="street-address">
+            </div>
+            <div class="f">
+              <label>CAP</label>
+              <input type="text" id="fCAP" placeholder="20100" maxlength="5" autocomplete="postal-code">
+            </div>
+            <hr class="fdiv">
+            <div class="flabel">Contatti</div>
+            <div class="f">
+              <label>Cellulare <span class="req">*</span></label>
+              <input type="tel" id="fCellulare" placeholder="+39 333 1234567" autocomplete="tel">
+              <span class="f-err" id="eCellulare">Obbligatorio</span>
+            </div>
+            <div class="f s2">
+              <label>Email <span class="req">*</span></label>
+              <input type="email" id="fEmail" placeholder="mario.rossi@email.it" autocomplete="email">
+              <span class="f-err" id="eEmail">Email non valida</span>
+            </div>
+            <hr class="fdiv">
+            <div class="flabel">Dichiarazione</div>
+            <div class="f">
+              <label>Tipo dichiarante</label>
+              <select id="fTipoDich">
+                <option value="dichiarante">Dichiarante</option>
+                <option value="coniuge">Coniuge Dichiarante</option>
+                <option value="congiunta">Dichiarazione Congiunta</option>
+              </select>
+            </div>
+            <div class="f s2">
+              <label>Note</label>
+              <input type="text" id="fNote" placeholder="Note aggiuntive...">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goNuovaStep(1)">← Indietro</button>
+        <button class="btn btn-orange" onclick="salvaAnagrafica()">Salva e Continua →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3 -->
+    <div id="stepN3" class="step-page" style="display:none">
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📎</span><div><div class="card-title">Carica Documenti</div><div class="card-subtitle" id="docHint">Carica PDF, foto dalla galleria o scatta una foto</div></div></div>
+        <div class="card-body">
+          <div class="upload-zone" id="uzUtente"
+               ondragover="ev.preventDefault();this.classList.add('drag')"
+               ondragleave="this.classList.remove('drag')"
+               ondrop="dropUtente(event)">
+            <input type="file" id="inputUtente" accept=".pdf,image/*" multiple onchange="handleUtenteFiles(this.files)">
+            <div class="upload-icon">📂</div>
+            <div class="upload-title">Trascina qui o tocca per scegliere</div>
+            <div class="upload-sub">PDF, JPG, PNG, HEIC · max 20MB per file</div>
+          </div>
+          <div class="upload-actions">
+            <button class="btn btn-ghost btn-sm" onclick="document.getElementById('inputUtente').click()">📁 Sfoglia file</button>
+            <button class="btn btn-ghost btn-sm" onclick="scattaFoto()">📷 Scatta foto</button>
+          </div>
+          <input type="file" id="inputCamera" accept="image/*" capture="environment" style="display:none" onchange="handleUtenteFiles(this.files)">
+          <div class="progress-bar"><div class="progress-fill" id="pfUtente"></div></div>
+          <div class="file-list" id="flUtente"></div>
+          <div id="utenteUploadStat" style="display:none;margin-top:10px;font-size:12px;color:var(--gray2)">
+            <span id="nUploaded">0</span> file caricati con successo
+          </div>
+        </div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="goNuovaStep(2)">← Indietro</button>
+        <button class="btn btn-green" id="btnConcludi" onclick="concludiInvia()" disabled>✅ Concludi e Invia</button>
+      </div>
+    </div>
+
+    <!-- STEP 4 -->
+    <div id="stepN4" class="step-page" style="display:none">
+      <div class="success-box">
+        <div class="success-icon">🎉</div>
+        <div class="success-title">Pratica inviata!</div>
+        <div class="success-sub">
+          La tua pratica è stata inviata al CAF.<br>
+          Quando l'operatore caricherà il modello definitivo<br>
+          potrai scaricarlo direttamente dalla tua area.
+        </div>
+        <div style="margin-top:24px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+          <button class="btn btn-orange" onclick="showView('viewUtenteDash'); renderListaUtente()">📋 Le mie pratiche</button>
+          <button class="btn btn-ghost" onclick="initNuovaPratica()">＋ Nuova Pratica</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     VIEW: OPERATORE – DASHBOARD
+═══════════════════════════════════════════════ -->
+<div id="viewOpDash" class="view">
+  <div class="topbar">
+    <div class="logo">CAF</div>
+    <div class="topbar-info">
+      <div class="topbar-title">Area Operatore</div>
+      <div class="topbar-sub">Gestione Pratiche 2026</div>
+    </div>
+    <span class="role-pill operatore">🔧 Operatore</span>
+    <button class="btn-logout" onclick="doLogout()">Esci</button>
+  </div>
+  <div class="main-wide">
+    <!-- STATS -->
+    <div class="stats-row" id="opStats"></div>
+    <!-- SEZIONE -->
+    <div class="sec-header">
+      <div><div class="sec-title">Gestione Pratiche</div><div class="sec-sub">Pratiche inviate dagli utenti</div></div>
+    </div>
+    <!-- FILTRI -->
+    <div class="filter-tabs" id="opFiltri">
+      <button class="ftab active" onclick="setFiltro('tutte',this)">Tutte</button>
+      <button class="ftab" onclick="setFiltro('730',this)">730/2026</button>
+      <button class="ftab" onclick="setFiltro('ISEE',this)">ISEE 2026</button>
+      <button class="ftab" onclick="setFiltro('inviata',this)">Inviate</button>
+      <button class="ftab" onclick="setFiltro('pronta',this)">Complete</button>
+    </div>
+    <input class="search-box" type="text" id="opSearch" placeholder="🔍  Cerca per nome, cognome o codice fiscale..." oninput="renderOpTabella()">
+    <!-- TABELLA -->
+    <div style="background:var(--bg2);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden">
+      <div style="overflow-x:auto">
+        <table class="op-table">
+          <thead>
+            <tr>
+              <th>Contribuente</th>
+              <th>Tipo</th>
+              <th>Data</th>
+              <th>Stato</th>
+              <th>Allegati</th>
+              <th>Azioni</th>
+            </tr>
+          </thead>
+          <tbody id="opTableBody"></tbody>
+        </table>
+      </div>
+      <div class="empty-state" id="opEmpty" style="display:none">
+        <div class="empty-icon">📭</div>
+        <div class="empty-title">Nessuna pratica trovata</div>
+        <div class="empty-sub">Le pratiche inviate dagli utenti appariranno qui</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════
+     VIEW: OPERATORE – DETTAGLIO PRATICA
+═══════════════════════════════════════════════ -->
+<div id="viewOpPratica" class="view">
+  <div class="topbar">
+    <div class="logo">CAF</div>
+    <div class="topbar-info">
+      <div class="topbar-title" id="opPraticaTitle">Dettaglio Pratica</div>
+      <div class="topbar-sub">Area Operatore</div>
+    </div>
+    <span class="back-link" onclick="showView('viewOpDash'); renderOpDashboard()">← Pratiche</span>
+  </div>
+  <div class="main-wide" id="opPraticaContent"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+// STORAGE
+// ═══════════════════════════════════════════════════════════════
+const DB_KEY = 'caf_pratiche_2026';
+const SESSION_KEY = 'caf_session';
+
+function dbLoad() {
+  try { return JSON.parse(localStorage.getItem(DB_KEY) || '[]'); } catch { return []; }
+}
+function dbSave(data) {
+  localStorage.setItem(DB_KEY, JSON.stringify(data));
+}
+function sessLoad() {
+  try { return JSON.parse(sessionStorage.getItem(SESSION_KEY) || 'null'); } catch { return null; }
+}
+function sessSave(s) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(s));
+}
+function sessClear() {
+  sessionStorage.removeItem(SESSION_KEY);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════════════════
+const CREDS = {
+  utente:    { password: '123456', ruolo: 'utente' },
+  operatore: { password: '123456', ruolo: 'operatore' }
+};
+let currentSession = sessLoad();
+let nuovaTipo = '730';
+let nuovaPid = null;
+let nuovaUploads = []; // {name, type, dataUrl, size}
+let opFiltroCorrente = 'tutte';
+
+// ═══════════════════════════════════════════════════════════════
+// VIEWS
+// ═══════════════════════════════════════════════════════════════
+function showView(id) {
+  var viewIds = ['viewLogin','viewUtenteDash','viewUtenteNuova','viewOpDash','viewOpPratica'];
+  viewIds.forEach(function(vid) {
+    var el = document.getElementById(vid);
+    if (el) el.style.display = 'none';
+  });
+  var target = document.getElementById(id);
+  if (target) {
+    target.style.display = (id === 'viewLogin') ? 'flex' : 'block';
+  }
+  window.scrollTo(0, 0);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// LOGIN / LOGOUT
+// ═══════════════════════════════════════════════════════════════
+function selRole(r) {
+  document.getElementById('tabU').className = 'role-tab' + (r === 'utente' ? ' sel-u' : '');
+  document.getElementById('tabO').className = 'role-tab' + (r === 'operatore' ? ' sel-o' : '');
+  document.getElementById('loginUser').value = r;
+}
+
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim().toLowerCase();
+  const p = document.getElementById('loginPass').value;
+  const err = document.getElementById('loginErr');
+  err.classList.remove('show');
+  const cred = CREDS[u];
+  if (cred && cred.password === p) {
+    currentSession = { username: u, ruolo: cred.ruolo };
+    sessSave(currentSession);
+    if (cred.ruolo === 'operatore') {
+      showView('viewOpDash');
+      renderOpDashboard();
+    } else {
+      showView('viewUtenteDash');
+      renderListaUtente();
+    }
+  } else {
+    err.classList.add('show');
+  }
+}
+
+function doLogout() {
+  sessClear();
+  currentSession = null;
+  document.getElementById('loginPass').value = '';
+  document.getElementById('loginErr').classList.remove('show');
+  showView('viewLogin');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTENTE: LISTA PRATICHE
+// ═══════════════════════════════════════════════════════════════
+function renderListaUtente() {
+  const all = dbLoad().filter(p => p.utenteOwner === 'utente');
+  const el = document.getElementById('listaPraticheUtente');
+  if (!all.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Nessuna pratica</div><div class="empty-sub">Clicca "Nuova Pratica" per iniziare</div></div>`;
+    return;
+  }
+  const statiLabel = { in_attesa: 'In attesa', inviata: 'Inviata ✓', pronta: 'Modello disponibile' };
+  const statiClass = { in_attesa: 's-attesa', inviata: 's-inviata', pronta: 's-pronta' };
+  el.innerHTML = all.reverse().map(p => {
+    const d = new Date(p.dataCreazione).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const tc = p.tipo === '730' ? '#FB923C' : '#60A5FA';
+    const bg = p.tipo === '730' ? 'rgba(240,100,25,0.15)' : 'rgba(37,99,235,0.15)';
+    // download rows
+    let dlRows = '';
+    if (p.stato === 'pronta' && p.modelli && p.modelli.length) {
+      dlRows = `<div class="pcard-downloads">` +
+        p.modelli.map(m => `
+          <div class="download-row" onclick="downloadModello('${p.id}','${m.nome}')">
+            <span style="font-size:18px">⬇️</span>
+            <span class="download-name">${m.label}</span>
+            <span class="download-badge">Scarica</span>
+          </div>`).join('') +
+        `</div>`;
+    }
+    return `<div class="pcard">
+      <div class="pcard-head">
+        <div class="pcard-avatar" style="background:${bg};border:1px solid ${tc}44">${p.tipo === '730' ? '📄' : '🏠'}</div>
+        <div style="flex:1;min-width:0">
+          <div class="pcard-nome">${p.cognome} ${p.nome}</div>
+          <div class="pcard-cf">${p.codiceFiscale}</div>
+          <div class="pcard-badges">
+            <span class="badge-tipo ${p.tipo === '730' ? 'bt730' : 'btISEE'}">${p.tipo === '730' ? '730/2026' : 'ISEE 2026'}</span>
+            <span class="badge ${statiClass[p.stato] || 's-attesa'}">${statiLabel[p.stato] || p.stato}</span>
+            <span class="pcard-date">📅 ${d} · ${p.nAllegati || 0} file</span>
+          </div>
+        </div>
+      </div>
+      ${dlRows}
+    </div>`;
+  }).join('');
+}
+
+function downloadModello(pid, nomeFile) {
+  const pratiche = dbLoad();
+  const p = pratiche.find(x => x.id === pid);
+  if (!p || !p.modelli) return;
+  const mod = p.modelli.find(m => m.nome === nomeFile);
+  if (!mod) return;
+  const a = document.createElement('a');
+  a.href = mod.dataUrl;
+  a.download = nomeFile;
+  a.click();
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UTENTE: NUOVA PRATICA
+// ═══════════════════════════════════════════════════════════════
+function initNuovaPratica() {
+  nuovaTipo = '730';
+  nuovaPid = null;
+  nuovaUploads = [];
+  // reset form
+  ['fCognome','fNome','fCF','fSesso','fNascita','fComune','fProv','fIndirizzo','fCAP','fCellulare','fEmail','fTipoDich','fNote'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.value = el.tagName === 'SELECT' ? el.options[0].value : ''; el.style.borderColor = ''; }
+  });
+  document.querySelectorAll('.f-err').forEach(e => e.classList.remove('show'));
+  document.getElementById('flUtente').innerHTML = '';
+  document.getElementById('btnConcludi').disabled = true;
+  document.getElementById('utenteUploadStat').style.display = 'none';
+  document.getElementById('pfUtente').style.width = '0%';
+  selTipo('730');
+  goNuovaStep(1);
+}
+
+function selTipo(t) {
+  nuovaTipo = t;
+  document.getElementById('tc730').className = 'tipo-card' + (t === '730' ? ' sel730' : '');
+  document.getElementById('tcISEE').className = 'tipo-card' + (t === 'ISEE' ? ' selISEE' : '');
+}
+
+function goNuovaStep(n) {
+  for (let i = 1; i <= 4; i++) {
+    const page = document.getElementById('stepN' + i);
+    if (page) page.style.display = (i === n ? 'block' : 'none');
+    const s = document.getElementById('sN' + i);
+    if (s) {
+      s.classList.remove('active', 'done');
+      if (i < n) s.classList.add('done');
+      if (i === n) s.classList.add('active');
+    }
+    const l = document.getElementById('lN' + i);
+    if (l) l.classList.toggle('done', i < n);
+  }
+  window.scrollTo(0, 0);
+  if (n === 3) {
+    const sub = nuovaTipo === '730'
+      ? 'Carica: CU 2026, spese sanitarie, mutuo, altri documenti fiscali'
+      : 'Carica: redditi, patrimonio, conti correnti, foto documenti';
+    document.getElementById('docHint').textContent = sub;
+  }
+}
+
+function salvaAnagrafica() {
+  let ok = true;
+  const chk = (id, eid, cond) => {
+    const el = document.getElementById(id);
+    const er = document.getElementById(eid);
+    const valid = cond(el ? el.value : '');
+    if (el) el.style.borderColor = valid ? '' : '#F87171';
+    if (er) er.classList.toggle('show', !valid);
+    if (!valid) ok = false;
+  };
+  chk('fCognome','eCognome', v => v.trim().length > 0);
+  chk('fNome','eNome', v => v.trim().length > 0);
+  chk('fCF','eCF', v => v.trim().length === 16);
+  chk('fSesso','eSesso', v => v !== '');
+  chk('fNascita','eNascita', v => v !== '');
+  chk('fComune','eComune', v => v.trim().length > 0);
+  chk('fProv','eProv', v => v.trim().length >= 2);
+  chk('fCellulare','eCellulare', v => v.trim().length >= 8);
+  chk('fEmail','eEmail', v => v.indexOf('@') > 0 && v.lastIndexOf('.') > v.indexOf('@'));
+  if (!ok) return;
+
+  nuovaPid = 'P' + Date.now() + Math.random().toString(36).slice(2, 6).toUpperCase();
+  const meta = {
+    id: nuovaPid,
+    utenteOwner: 'utente',
+    tipo: nuovaTipo,
+    stato: 'in_attesa',
+    dataCreazione: new Date().toISOString(),
+    cognome: document.getElementById('fCognome').value.trim(),
+    nome: document.getElementById('fNome').value.trim(),
+    codiceFiscale: document.getElementById('fCF').value.trim().toUpperCase(),
+    sesso: document.getElementById('fSesso').value,
+    dataNascita: document.getElementById('fNascita').value,
+    comune: document.getElementById('fComune').value.trim(),
+    provincia: document.getElementById('fProv').value.trim().toUpperCase(),
+    indirizzo: document.getElementById('fIndirizzo').value.trim(),
+    cap: document.getElementById('fCAP').value.trim(),
+    cellulare: document.getElementById('fCellulare').value.trim(),
+    email: document.getElementById('fEmail').value.trim(),
+    tipoDichiarante: document.getElementById('fTipoDich').value,
+    note: document.getElementById('fNote').value.trim(),
+    allegati: [],
+    modelli: [],
+    nAllegati: 0,
+  };
+  const pratiche = dbLoad();
+  pratiche.push(meta);
+  dbSave(pratiche);
+  goNuovaStep(3);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// UPLOAD FILE (UTENTE)
+// ═══════════════════════════════════════════════════════════════
+function scattaFoto() { document.getElementById('inputCamera').click(); }
+
+document.getElementById('uzUtente').addEventListener('dragover', e => { e.preventDefault(); document.getElementById('uzUtente').classList.add('drag'); });
+document.getElementById('uzUtente').addEventListener('dragleave', () => { document.getElementById('uzUtente').classList.remove('drag'); });
+function dropUtente(e) { e.preventDefault(); document.getElementById('uzUtente').classList.remove('drag'); handleUtenteFiles(e.dataTransfer.files); }
+
+function handleUtenteFiles(files) {
+  Array.from(files).forEach(f => processFile(f));
+}
+
+function processFile(file) {
+  const okExts = ['pdf','jpg','jpeg','png','webp','heic','heif','gif'];
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!okExts.includes(ext) && !file.type.startsWith('image/') && file.type !== 'application/pdf') {
+    alert('Formato non supportato. Usa PDF, JPG, PNG o altri formati immagine.');
+    return;
+  }
+  if (file.size > 20 * 1024 * 1024) { alert('File troppo grande (max 20MB)!'); return; }
+
+  const itemId = 'fi' + Date.now() + Math.random().toString(36).slice(2, 5);
+  const sz = file.size < 1048576 ? (file.size / 1024).toFixed(1) + ' KB' : (file.size / 1048576).toFixed(2) + ' MB';
+  const icon = file.type.startsWith('image/') ? '🖼️' : '📄';
+  const div = document.createElement('div');
+  div.className = 'file-item';
+  div.id = itemId;
+  div.innerHTML = `<span>${icon}</span><span class="file-name">${file.name}</span><span class="file-size">${sz}</span><span class="badge-wait" id="b${itemId}">⏳</span>`;
+  document.getElementById('flUtente').appendChild(div);
+
+  // Read as DataURL and store
+  const reader = new FileReader();
+  reader.onprogress = e => {
+    if (e.lengthComputable) document.getElementById('pfUtente').style.width = (e.loaded / e.total * 100) + '%';
+  };
+  reader.onload = () => {
+    // Save to pratica
+    const pratiche = dbLoad();
+    const p = pratiche.find(x => x.id === nuovaPid);
+    if (p) {
+      p.allegati.push({ nome: file.name, tipo: file.type || 'application/octet-stream', dataUrl: reader.result, size: sz });
+      p.nAllegati = p.allegati.length;
+      dbSave(pratiche);
+    }
+    div.classList.add('ok');
+    document.getElementById('b' + itemId).className = 'badge-ok';
+    document.getElementById('b' + itemId).textContent = '✓ OK';
+    const n = (parseInt(document.getElementById('nUploaded').textContent) || 0) + 1;
+    document.getElementById('nUploaded').textContent = n;
+    document.getElementById('utenteUploadStat').style.display = 'block';
+    document.getElementById('btnConcludi').disabled = false;
+    setTimeout(() => document.getElementById('pfUtente').style.width = '0%', 1000);
+  };
+  reader.onerror = () => {
+    div.classList.add('err');
+    document.getElementById('b' + itemId).className = 'badge-err';
+    document.getElementById('b' + itemId).textContent = '✗';
+  };
+  reader.readAsDataURL(file);
+}
+
+function concludiInvia() {
+  const pratiche = dbLoad();
+  const p = pratiche.find(x => x.id === nuovaPid);
+  if (p) {
+    p.stato = 'inviata';
+    p.dataInvio = new Date().toISOString();
+    dbSave(pratiche);
+  }
+  goNuovaStep(4);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OPERATORE: DASHBOARD
+// ═══════════════════════════════════════════════════════════════
+function renderOpDashboard() {
+  const all = dbLoad();
+  // stats
+  document.getElementById('opStats').innerHTML = `
+    <div class="stat-card"><div class="stat-ic b">📁</div><div><div class="stat-val">${all.length}</div><div class="stat-label">Totali</div></div></div>
+    <div class="stat-card"><div class="stat-ic o">📄</div><div><div class="stat-val">${all.filter(p=>p.tipo==='730').length}</div><div class="stat-label">730/2026</div></div></div>
+    <div class="stat-card"><div class="stat-ic b">🏠</div><div><div class="stat-val">${all.filter(p=>p.tipo==='ISEE').length}</div><div class="stat-label">ISEE 2026</div></div></div>
+    <div class="stat-card"><div class="stat-ic g">✅</div><div><div class="stat-val">${all.filter(p=>p.stato==='pronta').length}</div><div class="stat-label">Complete</div></div></div>
+  `;
+  renderOpTabella();
+}
+
+function setFiltro(f, btn) {
+  opFiltroCorrente = f;
+  document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderOpTabella();
+}
+
+function renderOpTabella() {
+  const search = (document.getElementById('opSearch').value || '').toLowerCase();
+  let all = dbLoad().filter(p => {
+    if (opFiltroCorrente === '730' && p.tipo !== '730') return false;
+    if (opFiltroCorrente === 'ISEE' && p.tipo !== 'ISEE') return false;
+    if (opFiltroCorrente === 'inviata' && p.stato !== 'inviata') return false;
+    if (opFiltroCorrente === 'pronta' && p.stato !== 'pronta') return false;
+    if (search && !`${p.cognome} ${p.nome} ${p.codiceFiscale}`.toLowerCase().includes(search)) return false;
+    return true;
+  }).reverse();
+
+  const tbody = document.getElementById('opTableBody');
+  const empty = document.getElementById('opEmpty');
+
+  if (!all.length) { tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+
+  const sl = { in_attesa: 's-attesa', inviata: 's-inviata', pronta: 's-pronta' };
+  const stl = { in_attesa: 'In attesa', inviata: 'Inviata ✓', pronta: 'Completa' };
+
+  tbody.innerHTML = all.map(p => {
+    const d = new Date(p.dataCreazione).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    return `<tr onclick="apriPraticaOp('${p.id}')" style="cursor:pointer">
+      <td><div class="nome-strong">${p.cognome} ${p.nome}</div><div class="cf-small">${p.codiceFiscale}</div></td>
+      <td><span class="badge-tipo ${p.tipo === '730' ? 'bt730' : 'btISEE'}">${p.tipo === '730' ? '730/2026' : 'ISEE 2026'}</span></td>
+      <td style="font-size:12px">${d}</td>
+      <td><span class="badge ${sl[p.stato] || 's-attesa'}">${stl[p.stato] || p.stato}</span></td>
+      <td style="font-family:var(--mono);font-size:12px">${p.nAllegati || 0}</td>
+      <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation();apriPraticaOp('${p.id}')">📂 Apri</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OPERATORE: DETTAGLIO PRATICA
+// ═══════════════════════════════════════════════════════════════
+function apriPraticaOp(pid) {
+  const pratiche = dbLoad();
+  const p = pratiche.find(x => x.id === pid);
+  if (!p) return;
+
+  const tl = p.tipo === '730' ? '730/2026' : 'ISEE 2026';
+  const tc = p.tipo === '730' ? '#FB923C' : '#60A5FA';
+  const bg = p.tipo === '730' ? 'rgba(240,100,25,0.15)' : 'rgba(37,99,235,0.15)';
+  const dc = new Date(p.dataCreazione).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  const sl = { in_attesa: 's-attesa', inviata: 's-inviata', pronta: 's-pronta' };
+  const stl = { in_attesa: 'In attesa', inviata: 'Inviata dall\'utente', pronta: 'Completata' };
+
+  document.getElementById('opPraticaTitle').textContent = `${p.cognome} ${p.nome} – ${tl}`;
+
+  // Build allegati utente
+  let allegatiHtml = '';
+  if (p.allegati && p.allegati.length) {
+    allegatiHtml = p.allegati.map((a, i) => {
+      const icon = a.tipo.startsWith('image/') ? '🖼️' : '📄';
+      return `<div class="file-item ok" style="margin-bottom:6px">
+        <span>${icon}</span>
+        <span class="file-name">${a.nome}</span>
+        <span class="file-size">${a.size}</span>
+        <button class="btn btn-ghost btn-sm" onclick="downloadAllegatoOp('${pid}',${i})">⬇</button>
+      </div>`;
+    }).join('');
+  } else {
+    allegatiHtml = '<div style="text-align:center;padding:16px;color:var(--gray);font-size:12px">Nessun documento caricato dall\'utente</div>';
+  }
+
+  // Build upload modelli section
+  let modelliHtml = '';
+  if (p.tipo === '730') {
+    modelliHtml = `
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📑</span><div><div class="card-title">Carica Modello 730/2026</div><div class="card-subtitle">Modello definitivo compilato</div></div></div>
+        <div class="card-body">
+          <div class="upload-zone" id="uz730op" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropOpModello(event,'730','${pid}')">
+            <input type="file" id="i730op" accept=".pdf,image/*" onchange="handleOpModello(this.files,'730','${pid}')">
+            <div class="upload-icon">📑</div>
+            <div class="upload-title">Carica Modello 730/2026</div>
+            <div class="upload-sub">PDF o immagine – max 50MB</div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="pf730op"></div></div>
+          <div class="file-list" id="fl730op"></div>
+          <div class="alert-ok" id="ok730op" style="${p.modelli && p.modelli.find(m=>m.tipo==='730') ? 'display:flex' : 'display:none'}">✅ Modello 730/2026 caricato. Pratica completata.</div>
+        </div>
+      </div>`;
+  } else {
+    // ISEE: 2 upload
+    modelliHtml = `
+      <div class="card" style="margin-bottom:16px">
+        <div class="card-header"><span class="card-icon">📋</span><div><div class="card-title">Carica Modello DSU</div><div class="card-subtitle">Dichiarazione Sostitutiva Unica</div></div></div>
+        <div class="card-body">
+          <div class="upload-zone" id="uzDSUop" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropOpModello(event,'dsu','${pid}')">
+            <input type="file" id="iDSUop" accept=".pdf,image/*" onchange="handleOpModello(this.files,'dsu','${pid}')">
+            <div class="upload-icon">📋</div>
+            <div class="upload-title">Carica Modello DSU</div>
+            <div class="upload-sub">PDF o immagine – max 50MB</div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="pfDSUop"></div></div>
+          <div class="file-list" id="flDSUop"></div>
+          <div class="alert-ok" id="okDSUop" style="${p.modelli && p.modelli.find(m=>m.tipo==='dsu') ? 'display:flex' : 'display:none'}">✅ Modello DSU caricato.</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><span class="card-icon">📄</span><div><div class="card-title">Carica Attestazione ISEE</div><div class="card-subtitle">Documento attestazione ISEE definitiva</div></div></div>
+        <div class="card-body">
+          <div class="upload-zone" id="uzATTop" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="dropOpModello(event,'att_isee','${pid}')">
+            <input type="file" id="iATTop" accept=".pdf,image/*" onchange="handleOpModello(this.files,'att_isee','${pid}')">
+            <div class="upload-icon">📄</div>
+            <div class="upload-title">Carica Attestazione ISEE</div>
+            <div class="upload-sub">PDF o immagine – max 50MB</div>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="pfATTop"></div></div>
+          <div class="file-list" id="flATTop"></div>
+          <div class="alert-ok" id="okATTop" style="${p.modelli && p.modelli.find(m=>m.tipo==='att_isee') ? 'display:flex' : 'display:none'}">✅ Attestazione ISEE caricata. Pratica completata.</div>
+        </div>
+      </div>`;
+  }
+
+  document.getElementById('opPraticaContent').innerHTML = `
+    <div class="ph">
+      <div class="ph-avatar" style="background:${bg};border:1px solid ${tc}44">${p.tipo === '730' ? '📄' : '🏠'}</div>
+      <div style="flex:1;min-width:0">
+        <div class="ph-nome">${p.cognome} ${p.nome}</div>
+        <div class="ph-cf">${p.codiceFiscale}</div>
+        <div class="ph-badges">
+          <span class="badge-tipo ${p.tipo === '730' ? 'bt730' : 'btISEE'}">${tl}</span>
+          <span class="badge ${sl[p.stato] || 's-attesa'}">${stl[p.stato] || p.stato}</span>
+          <span class="badge" style="background:var(--surface2);color:var(--gray3);border:1px solid var(--border)">📅 ${dc}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <div class="card-header"><span class="card-icon">👤</span><div><div class="card-title">Dati Anagrafici</div><div class="card-subtitle">Inseriti dall'utente</div></div></div>
+          <div class="card-body">
+            <div class="info-row"><span class="info-label">Cognome</span><span class="info-val">${p.cognome}</span></div>
+            <div class="info-row"><span class="info-label">Nome</span><span class="info-val">${p.nome}</span></div>
+            <div class="info-row"><span class="info-label">Cod. Fiscale</span><span class="info-val mono">${p.codiceFiscale}</span></div>
+            <div class="info-row"><span class="info-label">Sesso</span><span class="info-val">${p.sesso}</span></div>
+            <div class="info-row"><span class="info-label">Nascita</span><span class="info-val">${p.dataNascita}</span></div>
+            <div class="info-row"><span class="info-label">Comune</span><span class="info-val">${p.comune} (${p.provincia})</span></div>
+            <div class="info-row"><span class="info-label">Indirizzo</span><span class="info-val">${p.indirizzo || '—'} ${p.cap}</span></div>
+            <div class="info-row"><span class="info-label">Cellulare</span><span class="info-val mono">${p.cellulare}</span></div>
+            <div class="info-row"><span class="info-label">Email</span><span class="info-val">${p.email}</span></div>
+            <div class="info-row"><span class="info-label">Tipo dich.</span><span class="info-val">${p.tipoDichiarante}</span></div>
+            ${p.note ? `<div class="info-row"><span class="info-label">Note</span><span class="info-val">${p.note}</span></div>` : ''}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><span class="card-icon">📎</span><div><div class="card-title">Documenti dell'Utente</div><div class="card-subtitle">${p.nAllegati || 0} file caricati</div></div></div>
+          <div class="card-body">${allegatiHtml}</div>
+        </div>
+      </div>
+      <div>
+        ${modelliHtml}
+      </div>
+    </div>
+  `;
+
+  showView('viewOpPratica');
+}
+
+function downloadAllegatoOp(pid, idx) {
+  const pratiche = dbLoad();
+  const p = pratiche.find(x => x.id === pid);
+  if (!p || !p.allegati[idx]) return;
+  const a = p.allegati[idx];
+  const link = document.createElement('a');
+  link.href = a.dataUrl;
+  link.download = a.nome;
+  link.click();
+}
+
+function dropOpModello(e, tipo, pid) {
+  e.preventDefault();
+  const zoneMap = { '730': 'uz730op', 'dsu': 'uzDSUop', 'att_isee': 'uzATTop' };
+  const zone = document.getElementById(zoneMap[tipo]);
+  if (zone) zone.classList.remove('drag');
+  handleOpModello(e.dataTransfer.files, tipo, pid);
+}
+
+function handleOpModello(files, tipo, pid) {
+  Array.from(files).forEach(f => processOpModello(f, tipo, pid));
+}
+
+function processOpModello(file, tipo, pid) {
+  const okExts = ['pdf','jpg','jpeg','png','webp','heic','heif'];
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (!okExts.includes(ext)) { alert('Formato non supportato!'); return; }
+  if (file.size > 50 * 1024 * 1024) { alert('File troppo grande (max 50MB)!'); return; }
+
+  const listMap = { '730': 'fl730op', 'dsu': 'flDSUop', 'att_isee': 'flATTop' };
+  const progMap = { '730': 'pf730op', 'dsu': 'pfDSUop', 'att_isee': 'pfATTop' };
+  const okMap = { '730': 'ok730op', 'dsu': 'okDSUop', 'att_isee': 'okATTop' };
+  const labelMap = { '730': 'Modello 730/2026', 'dsu': 'Modello DSU', 'att_isee': 'Attestazione ISEE' };
+
+  const listEl = document.getElementById(listMap[tipo]);
+  if (listEl) listEl.innerHTML = ''; // replace previous
+
+  const itemId = 'fop' + Date.now();
+  const sz = file.size < 1048576 ? (file.size / 1024).toFixed(1) + ' KB' : (file.size / 1048576).toFixed(2) + ' MB';
+  const icon = file.type.startsWith('image/') ? '🖼️' : '📄';
+  const div = document.createElement('div');
+  div.className = 'file-item'; div.id = itemId;
+  div.innerHTML = `<span>${icon}</span><span class="file-name">${file.name}</span><span class="file-size">${sz}</span><span class="badge-wait" id="b${itemId}">⏳</span>`;
+  if (listEl) listEl.appendChild(div);
+
+  const reader = new FileReader();
+  reader.onprogress = e => {
+    if (e.lengthComputable) {
+      const pe = document.getElementById(progMap[tipo]);
+      if (pe) pe.style.width = (e.loaded / e.total * 100) + '%';
+    }
+  };
+  reader.onload = () => {
+    const pratiche = dbLoad();
+    const p = pratiche.find(x => x.id === pid);
+    if (p) {
+      // Remove old modello of same tipo
+      p.modelli = (p.modelli || []).filter(m => m.tipo !== tipo);
+      p.modelli.push({ tipo, nome: file.name, label: labelMap[tipo], dataUrl: reader.result, size: sz });
+      // Check completeness
+      if (p.tipo === '730' && p.modelli.find(m => m.tipo === '730')) {
+        p.stato = 'pronta';
+      } else if (p.tipo === 'ISEE' && p.modelli.find(m => m.tipo === 'dsu') && p.modelli.find(m => m.tipo === 'att_isee')) {
+        p.stato = 'pronta';
+      }
+      dbSave(pratiche);
+    }
+    div.classList.add('ok');
+    document.getElementById('b' + itemId).className = 'badge-ok';
+    document.getElementById('b' + itemId).textContent = '✓ OK';
+    const oke = document.getElementById(okMap[tipo]);
+    if (oke) oke.style.display = 'flex';
+    setTimeout(() => { const pe = document.getElementById(progMap[tipo]); if (pe) pe.style.width = '0%'; }, 1000);
+  };
+  reader.readAsDataURL(file);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════════
+(function init() {
+  // Hide all views first
+  ['viewLogin','viewUtenteDash','viewUtenteNuova','viewOpDash','viewOpPratica'].forEach(function(vid) {
+    var el = document.getElementById(vid);
+    if (el) el.style.display = 'none';
+  });
+  if (currentSession) {
+    if (currentSession.ruolo === 'operatore') {
+      showView('viewOpDash');
+      renderOpDashboard();
+    } else {
+      showView('viewUtenteDash');
+      renderListaUtente();
+    }
+  } else {
+    showView('viewLogin');
+  }
+})();
+</script>
+</body>
+</html>
